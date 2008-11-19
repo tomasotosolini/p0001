@@ -1,0 +1,154 @@
+
+\chapter{Expressions}
+
+
+
+\section{process-defintion}
+
+\subsection{description}
+
+This expression is used to define processes and sub processes. It will be always present
+in your workflow definition since at least the root of your process must be defined
+by this. 
+
+
+\subsection{core attributes}
+
+\begin{itemize}
+ 
+ \item \textit{name} The name of the (sub)process.
+ \item \textit{revision} The version of the process schema.
+
+
+\end{itemize}
+
+\begin{quote}
+    WARNING: when our expression is used to define \emph{subprocesses} the 
+    name is very important because is used to call them :
+
+    \begin{verbatim}
+    ...
+    <participant ref="alpha" /> 
+    <subprocess ref="aSubprocess" />
+    ...
+
+    <!-- SUBPROCESS: aSubprocess -->
+
+    <process-definition name="aSubprocess">
+        ...
+    </process-definition >
+    \end{verbatim}
+\end{quote}
+
+    \subsection{attributes}
+
+None.
+
+    \subsection{structure}
+
+When used as a process definition:
+\begin{verbatim}
+<process-definition name="aProcess" revision="1" >
+
+    [an expression]
+
+        <!-- subprocesses -->
+    [list of process-defintions]
+
+</process-definition >
+\end{verbatim}
+
+When used as a subprocess defintion
+\begin{verbatim}
+<process-definition name="aSubprocess" >
+
+    [an expression]
+
+</process-definition >
+\end{verbatim}
+
+\newpage
+
+
+
+
+\section{participant}
+
+    \subsection{description}
+
+description and other things
+
+    \subsection{core attributes}
+
+core attributes and other things
+
+    \subsection{attributes}
+
+attributes and other things
+
+    \subsection{structure}
+
+structure and other things
+
+
+
+
+\section{sequence}
+
+    \subsection{description}
+
+description and other things
+
+    \subsection{core attributes}
+
+core attributes and other things
+
+    \subsection{attributes}
+
+attributes and other things
+
+    \subsection{structure}
+
+structure and other things
+
+
+
+
+\section{if}
+
+\subsection{description}
+
+        description and other things
+
+    \subsection{core attributes}
+
+core attributes and other things
+
+    \subsection{attributes}
+
+attributes and other things
+
+    \subsection{structure}
+
+structure and other things
+
+
+
+
+\section{concurrence}
+
+    \subsection{description}
+
+description and other things
+
+    \subsection{core attributes}
+
+core attributes and other things
+
+    \subsection{attributes}
+
+attributes and other things
+
+    \subsection{structure}
+
+structure and other things

@@ -1,0 +1,282 @@
+
+\chapter{Basic usage}
+
+\section{A simple example}
+
+Now you completed the installation of route. Now we describe a first basic
+example of usage of the engine, showing the some of the keys concepts of
+everyday ruote life: processes and participants. 
+
+    \subsection{Process description}
+        The idea of this process is to ask to a set of two(or possibly more) users what 
+        are their impressions about a famous and widely used language, Ruby, in order to 
+        make a market study for some further application by some survey agency.
+
+        We choose to make this survey by sending a request mail that contains a small 
+        text document with the question(s) to all the selected users. Once they have
+        completed, they will reply back with a mail to the original survey agency. When
+        all the participants have replied, the agency will create a report describing all
+        the answers and the this report is forwarded to the statistical team.
+
+        Ok now we have described the problem, it's time to dive in the ruby/xml coding\ldots
+
+    \subsection{Preparation}
+
+        Being installed as a gem, to use it in your software, you have to write:
+
+        \begin{quote}
+        \small{(assuming that your software is saved in \$DIR/survey.rb)}
+        \end{quote}
+
+        \begin{quote}
+        \begin{verbatim}
+        
+require 'rubygems' 
+    # this is not needed here, but to enable the following 'gem' command
+    # you must provide it somewhere in your code (see rubygems for details)
+
+gem 'ruote'
+        
+        \end{verbatim}
+        \end{quote}
+
+        You must have an instance of the engine, so write:
+        
+        
+        \begin{quote}
+        \begin{verbatim}
+        
+require 'openwfe/engine/engine'
+
+#
+# instantiating an engine
+
+engine = OpenWFE::Engine.new
+        
+        \end{verbatim}
+        \end{quote}
+
+
+        Now the engine is instantiated. To enable it to make some more interesting work
+        we must now add some participants, i.e. some subjects that perform one ore
+        more activities along the process.
+        
+        \begin{quote}
+        \begin{verbatim}
+        
+#
+# adding some participants
+
+engine.register_participant :matz do |workitem|
+    puts "matz got the questionary..."
+    workitem.matz_comment = ... 
+        # you can imagine the content of this string :)
+end
+
+engine.register_participant :john do |workitem|
+    puts "john  got then the questionary..."
+    workitem.john_comment = "Ruby is a great language."
+    workitem.john_comment2 = "Java too anyway..."
+end
+
+engine.register_participant :linus do |workitem|
+    puts "linus got then the questionary..."
+    workitem.linus_comment = "I like best C."
+    workitem.linus_comment2 = "But last yesterday while waiting for the bus, I wrote down an 
+        experimental kernel written in Ruby and it works great."
+end
+
+engine.register_participant :summarize do |workitem|
+    puts 
+    puts "summary of process #{workitem.fei.workflow_instance_id}"
+    workitem.attributes.each do |k, v|
+        next unless k.match ".*_comment$"
+        puts " - #{k} : '#{v}'"
+    end
+end 
+        
+        \end{verbatim}
+        \end{quote}
+
+        So now we have four participants (it seems that the first three are like humans, 
+        and the fourth is more similar to a machine\footnote{The reader should 
+        realize that the name "participant`` is choosen to identify an entity that is
+        part of the process, and since like in every day of our life there are processes
+        that involve both humans and machines here we have such a situation. As example we 
+        may say that there are processes involving \emph{only humans}  ( The Tea Taasting 
+        Team ...), processes with mixed actors ( ) and processes involving \emph{only machines}
+        (Satellite control, Semaphores, Air conditioning control, Medical Equipments)
+        
+        })
+
+        Now let's define a process to be executed(choosing one that involves the 
+        participants already registered). For Ruby lovers:
+
+        \begin{quote}
+        \begin{verbatim}
+
+require 'openwfe/def'
+
+
+class TheProcessDefinition0 < OpenWFE::ProcessDefinition
+
+    sequence do
+
+        concurrence do
+
+            participant :alice
+            participant :bob
+        end
+
+        participant :summarize
+    end
+end
+
+
+        \end{verbatim}
+        \end{quote}
+
+        .. or for those loving XML\footnote{Let's assume we saved this XML into a file named \$DIR/process.xml}:
+
+        \begin{quote}
+        \begin{verbatim}
+
+<process-definition name="TheProcessDefinition" revision="123">
+
+    <sequence>
+
+        <concurrence>
+
+            <participant ref="alice" />
+            <participant ref="bob"
+        </concurrence>
+
+        <participant ref="summarize" />
+    </sequence>
+</process-definition >
+
+
+        \end{verbatim}
+        \end{quote}
+
+
+    \subsection{Execution}
+
+
+
+
+
+
+
+
+
+
+
+Now let's see how to use this defintions.
+
+The first thing to do is start the process. In Ruote this is done feeding it with
+a special object called \textbf{launch item}. Later we shall see that internally 
+the engine operates on objects called \textbf{workitems} and this is only a special
+workitem used to ''bootstrap``.
+
+\begin{quote}
+\begin{verbatim}
+
+require 'openwfe/workitem'
+
+#
+# launching the process
+
+li = OpenWFE::LaunchItem.new(TheProcessDefinition0)
+
+#li = OpenWFE::LaunchItem.new('$DIR/process.xml')
+    #
+    # XML devotes will use this
+
+li.initial_comment = "please give your impressions
+                        about http://ruby-lang.org"
+
+\end{verbatim}
+\end{quote}
+
+Ok now we have the initial item, so we can ''lauch`` a new process.
+
+\begin{quote}
+\begin{verbatim}
+
+fei = engine.launch li
+    #
+    # 'fei' means FlowExpressionId, the fei returned here is the
+    # identifier for the root expression of the newly launched process
+
+puts "started process '#{fei.workflow_instance_id}'"
+
+\end{verbatim}
+\end{quote}
+
+And now let's tell the script's main thread to wait until the process thread 
+completed it's life\footnote{Here the reader may discover one of the most 
+important features that come with the software described. Ruote is 
+\emph{completely threaded} ie when ''public`` methods are called the response 
+is not realtime, but instead requests are queued for later execution. }
+
+\begin{quote}
+\begin{verbatim}
+
+engine.wait_for fei
+    #
+    # blocks until the process terminates
+
+\end{verbatim}
+\end{quote}
+
+
+So at the end of the work it's time to run the script:
+
+\begin{quote}
+\begin{verbatim}
+
+$ cd $DIR
+(changed dir to $DIR)
+
+$ ruby workflow.rb
+
+\end{verbatim}
+\end{quote}
+
+and the output should appear as follows:
+
+\begin{quote}
+\begin{verbatim}
+
+alice got a workitem...
+bob got a workitem...
+
+summary of process 1173232330251
+    - bob_comment : 'not for me, I prefer VB'
+    - alice_comment : 'this thing looks interesting'
+    - initial_comment : 'please give your impressions 
+                            about http://ruby-lang.org'
+
+
+
+\end{verbatim}
+\end{quote}
+
+
+
+
+
+
+
+
+
+\section{A more sophisticated example}
+
+    \subsection{Process description}
+
+    \subsection{Preparation}
+
+    \subsection{Execution}
+
+    \subsection{Analisys}
